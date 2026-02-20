@@ -6,6 +6,7 @@ import { subsRouter } from "./routes/subscriptions.js";
 import { checkoutRouter } from "./routes/checkout.js";
 import { webhookMockRouter } from "./routes/webhookMock.js";
 import { meRouter } from "./routes/me.js";
+import { libraryRouter } from "./routes/library.js";
 import { verifyTelegramWebAppInitData } from "./telegramAuth.ts";
 import cors from "cors";
 
@@ -16,6 +17,7 @@ app.use("/checkout", checkoutRouter);
 app.use("/webhook", webhookMockRouter);
 app.use("/users", usersRouter);
 app.use("/me", meRouter);
+app.use("/library", libraryRouter);
 app.use("/subscriptions", subsRouter);
 app.post("/auth/telegram", async (req, res) => {
   const initData = String(req.body?.initData ?? "");
