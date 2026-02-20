@@ -36,3 +36,36 @@ subsRouter.get("/status/:telegram_user_id", async (req, res) => {
     res.status(500).json({ ok: false });
   }
 });
+
+// Day 5: cancel subscription from Mini App
+subsRouter.post("/cancel", async (req, res) => {
+  const telegramUserId = Number(
+    req.query.telegram_user_id ?? req.headers["x-telegram-user-id"]
+  );
+
+  if (!telegramUserId) {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(401).json({ ok: false, error: "unauthorized" });
+    }
+    return res.status(400).json({ ok: false, error: "telegram_user_id required" });
+  }
+
+  try {
+    const result = await pool.query(
+      `update subscriptions
+       set status = 'canceled', updated_at = now()
+       where telegram_user_id = $1
+       returning id`,
+      [telegramUserId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.json({ ok: true, message: "no subscription found" });
+    }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("/subscriptions/cancel error:", err);
+    return res.status(500).json({ ok: false });
+  }
+});
