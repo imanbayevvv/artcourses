@@ -9,6 +9,7 @@ type TgUser = {
 };
 
 export default function Page() {
+  const API = process.env.NEXT_PUBLIC_API_URL!;
   const [initData, setInitData] = useState("");
   const [user, setUser] = useState<TgUser | null>(null);
   const [sub, setSub] = useState<any>(null);
@@ -27,8 +28,8 @@ export default function Page() {
   async function login() {
     setError("");
     setSub(null);
-
-    const r = await fetch("https://beginning-optimum-hanging-revenues.trycloudflare.com/auth/telegram", {
+    
+    const r = await fetch(`${API}/auth/telegram`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ initData }),
@@ -42,7 +43,7 @@ export default function Page() {
 
     setUser(data.tgUser);
 
-    const s = await fetch(`https://beginning-optimum-hanging-revenues.trycloudflare.com/subscriptions/status/${data.tgUser.id}`);
+    const s = await fetch(`${API}/subscriptions/status/${data.tgUser.id}`);
     const sd = await s.json();
     setSub(sd);
   }
@@ -84,10 +85,73 @@ export default function Page() {
       )}
 
       {sub && (
-        <pre style={{ marginTop: 16, padding: 12, background: "#f4f4f4", borderRadius: 12 }}>
-          {JSON.stringify(sub, null, 2)}
-        </pre>
-      )}
+        <div
+          style={{
+            marginTop: 20,
+            padding: 16,
+            borderRadius: 16,
+            border: "1px solid #ddd",
+            background: "#fafafa",
+          }}
+        >
+          <div style={{ fontWeight: 700, fontSize: 18 }}>Подписка</div>
+
+          {sub.status === "none" ? (
+            <>
+              <div style={{ marginTop: 8 }}>Нет активной подписки</div>
+              <a
+                href="https://t.me/ZaycevaArtCoursesBot?start=subscription"
+                style={{
+                  display: "inline-block",
+                  marginTop: 12,
+                  padding: "10px 14px",
+                  borderRadius: 12,
+                  background: "black",
+                  color: "white",
+                  textDecoration: "none",
+                  fontWeight: 600,
+                }}
+              >
+                Оформить подписку
+              </a>
+            </>
+          ) : (
+            <>
+              <div style={{ marginTop: 8 }}>
+                Статус: <b>{sub.status}</b>
+              </div>
+  
+              {sub.plan_title && (
+                <div>План: {sub.plan_title}</div>
+              )}
+
+              {sub.current_period_end && (
+                <div>
+                  Доступ до:{" "}
+                  {new Date(sub.current_period_end).toLocaleString("ru-RU")}
+                </div>
+              )}
+
+              <a
+                href="https://t.me/ZaycevaArtCoursesBot?start=subscription"
+                style={{
+                  display: "inline-block",
+                  marginTop: 12,
+                  padding: "10px 14px",
+                  borderRadius: 12,
+                  background: "#333",
+                  color: "white",
+                  textDecoration: "none",
+                  fontWeight: 600,
+                }}
+              >
+                Управлять подпиской
+              </a>
+            </>
+          )}
+        </div>
+      )}      
+
     </main>
   );
 }
