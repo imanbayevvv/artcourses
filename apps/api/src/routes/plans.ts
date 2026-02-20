@@ -9,39 +9,21 @@ plansRouter.get("/", async (_req, res) => {
       `select id, title, description, price_monthly, price_yearly from plans order by price_monthly asc nulls last`
     );
 
-    const items = result.rows.flatMap((row) => {
-      const out: Array<{
-        id: string;
-        title: string;
-        price: number;
-        currency: string;
-        period: string;
-        badge?: string;
-      }> = [];
+    const items = result.rows
+      .map((row) => {
+        const isYearly = row.id === "yearly";
+        const price = Number(isYearly ? row.price_yearly : row.price_monthly) || 0;
 
-      if (row.price_monthly != null) {
-        out.push({
-          id: row.id,
-          title: row.title,
-          price: Number(row.price_monthly),
-          currency: "KZT",
-          period: "monthly",
-        });
-      }
-
-      if (row.price_yearly != null) {
-        out.push({
-          id: row.id,
-          title: row.title,
-          price: Number(row.price_yearly),
-          currency: "KZT",
-          period: "yearly",
-          badge: "Выгодно",
-        });
-      }
-
-      return out;
-    });
+        return {
+          id: String(row.id),
+          title: String(row.title),
+          price,
+          currency: "KZT" as const,
+          period: isYearly ? "yearly" : "monthly",
+          ...(isYearly ? { badge: "Выгодно" } : {}),
+        };
+      })
+      .filter((item) => item.price > 0);
 
     return res.json({ ok: true, items });
   } catch (err) {
