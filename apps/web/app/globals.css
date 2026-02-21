@@ -1,26 +1,635 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: var(--tg-theme-bg-color, #ffffff);
+  --text: var(--tg-theme-text-color, #1a1a1a);
+  --hint: var(--tg-theme-hint-color, #999999);
+  --link: var(--tg-theme-link-color, #2678b6);
+  --btn: var(--tg-theme-button-color, #3390ec);
+  --btn-text: var(--tg-theme-button-text-color, #ffffff);
+  --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+  --section-bg: var(--tg-theme-section-bg-color, #ffffff);
+  --border: #e5e5e5;
+  --danger: #dc3545;
+  --success: #28a745;
+  --warning: #f0ad4e;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── App container ───────────────────────────────── */
+
+.app-container {
+  min-height: 100vh;
+  padding: 16px 16px 80px; /* bottom padding for tab bar */
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Loading / Error screens ─────────────────────── */
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 12px;
+  color: var(--hint);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--btn);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-screen h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.error-screen p {
+  color: var(--hint);
+  font-size: 14px;
+}
+
+/* ── Buttons ─────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:active:not(:disabled) {
+  opacity: 0.7;
+}
+
+.btn-primary {
+  background: var(--btn);
+  color: var(--btn-text);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  width: 100%;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--link);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+/* ── Tab bar ─────────────────────────────────────── */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--section-bg);
+  border-top: 1px solid var(--border);
+  padding: 6px 0;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--hint);
+  font-size: 11px;
+  transition: color 0.15s;
+}
+
+.tab-item.tab-active {
+  color: var(--btn);
+}
+
+.tab-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.tab-label {
+  font-weight: 500;
+}
+
+.tab-content {
+  min-height: calc(100vh - 120px);
+}
+
+/* ── Section titles ──────────────────────────────── */
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.category-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ── Cards ───────────────────────────────────────── */
+
+.course-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--secondary-bg);
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.course-card:active {
+  opacity: 0.7;
+}
+
+.course-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.course-card-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.course-card-meta {
+  font-size: 13px;
+  color: var(--hint);
+}
+
+.course-card-arrow {
+  font-size: 18px;
+  color: var(--hint);
+  margin-left: 8px;
+}
+
+.catalog-card {
+  padding: 14px 16px;
+  background: var(--secondary-bg);
+  border-radius: 14px;
+  margin-bottom: 8px;
+}
+
+.catalog-card-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.catalog-card-desc {
+  font-size: 13px;
+  color: var(--hint);
+  margin-top: 2px;
+}
+
+/* ── Profile ─────────────────────────────────────── */
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--secondary-bg);
+  border-radius: 14px;
+  margin-bottom: 8px;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--btn);
+  color: var(--btn-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.profile-username {
+  font-size: 13px;
+  color: var(--hint);
+}
+
+/* ── Subscription details ────────────────────────── */
+
+.sub-details-card {
+  background: var(--secondary-bg);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.sub-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sub-row:last-child {
+  border-bottom: none;
+}
+
+.sub-label {
+  color: var(--hint);
+  font-size: 14px;
+}
+
+.sub-status {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.sub-status--active {
+  color: var(--success);
+}
+
+.sub-status--past_due {
+  color: var(--warning);
+}
+
+.sub-status--canceled {
+  color: var(--danger);
+}
+
+.sub-status--none,
+.sub-status--expired {
+  color: var(--hint);
+}
+
+/* ── Banners ─────────────────────────────────────── */
+
+.info-banner {
+  padding: 12px 16px;
+  background: #e8f4fd;
+  color: #1a73e8;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.warning-banner {
+  padding: 12px 16px;
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ── Paywall ─────────────────────────────────────── */
+
+.paywall {
+  text-align: center;
+  padding: 40px 0 0;
+}
+
+.paywall-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.paywall h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.paywall-desc {
+  color: var(--hint);
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+
+/* ── Plan cards ──────────────────────────────────── */
+
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plan-card {
+  position: relative;
+  padding: 16px;
+  background: var(--secondary-bg);
+  border-radius: 14px;
+  border: 2px solid transparent;
+}
+
+.plan-card--recommended {
+  border-color: var(--btn);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  background: var(--success);
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.plan-rec {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: var(--btn);
+  color: var(--btn-text);
+  padding: 2px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.plan-label {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.plan-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.plan-old-price {
+  text-decoration: line-through;
+  color: var(--hint);
+  font-size: 14px;
+}
+
+.plan-price {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.plan-period {
+  color: var(--hint);
+  font-size: 14px;
+}
+
+.plan-btn {
+  width: 100%;
+}
+
+/* ── Course / Lesson views ───────────────────────── */
+
+.course-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 12px 0 8px;
+}
+
+.course-desc {
+  color: var(--hint);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.lessons-list h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.lesson-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--secondary-bg);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 6px;
+  text-align: left;
+  gap: 12px;
+}
+
+.lesson-card:active {
+  opacity: 0.7;
+}
+
+.lesson-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--btn);
+  color: var(--btn-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.lesson-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.lesson-name {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.lesson-dur {
+  font-size: 12px;
+  color: var(--hint);
+}
+
+.lesson-play {
+  color: var(--btn);
+  font-size: 16px;
+}
+
+/* ── Lesson player ───────────────────────────────── */
+
+.lesson-player {
+  padding-bottom: 20px;
+}
+
+.lesson-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 12px 0 4px;
+}
+
+.lesson-meta {
+  font-size: 13px;
+  color: var(--hint);
+  margin-bottom: 16px;
+}
+
+.video-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.video-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+.video-placeholder p {
+  opacity: 0.5;
+  font-size: 14px;
+}
+
+.lesson-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.lesson-nav .btn {
+  flex: 1;
+}
+
+/* ── Toast ───────────────────────────────────────── */
+
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 200;
+  animation: toast-in 0.3s ease;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ── Utilities ───────────────────────────────────── */
+
+.muted {
+  color: var(--hint);
+  font-size: 14px;
 }
