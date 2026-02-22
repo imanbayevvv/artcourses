@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/index.ts",
-    "db:setup": "docker exec -i artcourses_db psql -U art -d artcourses < src/db/schema.sql"
+    "db:setup": "psql -h localhost -U art -d artcourses -f src/db/schema.sql"
   },
   "keywords": [],
   "author": "",
