@@ -5,14 +5,7 @@ export const checkoutRouter = Router();
 
 function generateMockCheckout(telegramUserId: number, planId: string) {
   const event_id = `mock_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-  const base = process.env.PUBLIC_WEBAPP_URL ?? "https://example.com";
-
-  const checkout_url = `${base}/mock-checkout?event_id=${encodeURIComponent(
-    event_id
-  )}&telegram_user_id=${encodeURIComponent(
-    telegramUserId
-  )}&plan_id=${encodeURIComponent(planId)}`;
-
+  const checkout_url = `https://mock.local/checkout?event_id=${event_id}&telegram_user_id=${telegramUserId}&plan_id=${planId}`;
   return { event_id, checkout_url };
 }
 
@@ -39,10 +32,10 @@ checkoutRouter.post("/create", async (req, res) => {
   );
 
   await pool.query(
-    `insert into mock_checkouts (event_id, telegram_user_id, plan_id)
-     values ($1, $2, $3)
+    `insert into mock_checkouts (event_id, telegram_user_id, plan_id, checkout_url)
+     values ($1, $2, $3, $4)
      on conflict (event_id) do nothing`,
-    [event_id, Number(telegram_user_id), String(plan_id)]
+    [event_id, Number(telegram_user_id), String(plan_id), checkout_url]
   );
 
   return res.json({ ok: true, provider: "mock", event_id, checkout_url });
@@ -90,10 +83,10 @@ checkoutRouter.post("/start", async (req, res) => {
     const { event_id, checkout_url } = generateMockCheckout(telegramUserId, String(plan_id));
 
     await pool.query(
-      `insert into mock_checkouts (event_id, telegram_user_id, plan_id)
-       values ($1, $2, $3)
+      `insert into mock_checkouts (event_id, telegram_user_id, plan_id, checkout_url)
+       values ($1, $2, $3, $4)
        on conflict (event_id) do nothing`,
-      [event_id, telegramUserId, String(plan_id)]
+      [event_id, telegramUserId, String(plan_id), checkout_url]
     );
 
     return res.json({ ok: true, event_id, checkout_url });

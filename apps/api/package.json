@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "db:setup": "docker exec -i artcourses_db psql -U art -d artcourses < src/db/schema.sql"
   },
   "keywords": [],
   "author": "",
